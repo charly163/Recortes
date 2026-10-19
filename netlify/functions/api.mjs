@@ -14,7 +14,7 @@ function responseAdapter() {
   };
 }
 
-export default async (event) => {
+export const handler = async (event) => {
   try {
     await store.init();
     const path = (event.path || '/').replace(/^\/\.netlify\/functions\/api/, '/api');
