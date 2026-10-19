@@ -4,12 +4,12 @@ import { buildPreview, detectPlatform } from './preview.js';
 import { store } from './store.js';
 import {
   cleanupPreviewFiles,
-  findPreviewFile,
   mimeForExt,
   promotePreviewImage,
   saveImageForLink,
   savePreviewImage,
-  thumbFile,
+  readPreviewImage,
+  readThumb,
 } from './thumbs.js';
 
 const ID_RE = /^([a-zA-Z0-9-]{6,64})$/;
@@ -63,23 +63,19 @@ export async function handleApi(req, res, url) {
   }
 
   if (parts[1] === 'preview-image' && parts[2] && method === 'GET') {
-    const found = await findPreviewFile(parts[2]);
+    const found = await readPreviewImage(parts[2]);
     if (!found) throw new HttpError(404, 'La vista previa expiró. Probá de nuevo.');
-    await sendFile(req, res, found.file, {
-      contentType: mimeForExt(found.ext),
-      cacheControl: 'no-store',
-    });
+    res.writeHead(200, { 'Content-Type': mimeForExt(found.ext), 'Content-Length': found.buffer.length, 'Cache-Control': 'no-store' });
+    res.end(found.buffer);
     return true;
   }
 
   if (parts[1] === 'thumb' && parts[2] && method === 'GET') {
     const link = store.data.links.find((l) => l.id === parts[2]);
-    const found = link ? await thumbFile(link.id) : await thumbFile(parts[2]);
+    const found = link ? await readThumb(link.id) : await readThumb(parts[2]);
     if (!found) throw new HttpError(404, 'Sin miniatura.');
-    await sendFile(req, res, found.file, {
-      contentType: mimeForExt(found.ext),
-      cacheControl: 'public, max-age=86400',
-    });
+    res.writeHead(200, { 'Content-Type': mimeForExt(found.ext), 'Content-Length': found.buffer.length, 'Cache-Control': 'public, max-age=86400' });
+    res.end(found.buffer);
     return true;
   }
 
@@ -91,7 +87,7 @@ export async function handleApi(req, res, url) {
     try {
       linkUrl = new URL(String(body.url).trim());
     } catch {
-      throw new HttpError(400, 'Ese link no es válido.');
+      throw new HttpError(400, 'Ese link no es vÃ¡lido.');
     }
     if (linkUrl.protocol !== 'http:' && linkUrl.protocol !== 'https:') {
       throw new HttpError(400, 'Solo se pueden guardar links http o https.');
@@ -154,13 +150,13 @@ export async function handleApi(req, res, url) {
   const linkMatch = /^\/api\/links\/([a-zA-Z0-9-]{6,64})(?:\/(refresh))?$/.exec(pathname);
   if (linkMatch) {
     const id = linkMatch[1];
-    if (!ID_RE.test(id)) throw new HttpError(400, 'Id inválido.');
+    if (!ID_RE.test(id)) throw new HttpError(400, 'Id invÃ¡lido.');
 
     if (method === 'PATCH' && !linkMatch[2]) {
       const body = await readJson(req);
       if (body.imageUrl) {
         const thumb = await saveImageForLink(body.imageUrl, id);
-        if (!thumb) throw new HttpError(422, 'No pudimos descargar esa imagen. Probá con otra URL.');
+        if (!thumb) throw new HttpError(422, 'No pudimos descargar esa imagen. ProbÃ¡ con otra URL.');
         await store.setThumb(id, { file: thumb.file, ext: thumb.ext, source: thumb.source || body.imageUrl });
       } else if (body.removeThumb) {
         await store.removeThumbFiles(id);
@@ -193,7 +189,7 @@ export async function handleApi(req, res, url) {
     }
   }
 
-  // ------------------------------------------------------------- categorías
+  // ------------------------------------------------------------- categorÃ­as
   if (pathname === '/api/categories' && method === 'POST') {
     const body = await readJson(req, 20_000);
     const category = await store.createCategory({ name: body.name, parentId: body.parentId, icon: body.icon });
@@ -244,3 +240,6 @@ export async function handleApi(req, res, url) {
 
   throw new HttpError(404, 'Ruta de API desconocida.');
 }
+
+
+

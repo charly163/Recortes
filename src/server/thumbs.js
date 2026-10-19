@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { mkdir, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { CONFIG, PATHS } from './config.js';
 import { safeFetch, readLimited } from './preview.js';
@@ -22,6 +22,12 @@ const MIME_BY_EXT = {
 };
 
 const TOKEN_RE = /^[a-f0-9]{16,40}$/;
+const ON_NETLIFY = Boolean(process.env.NETLIFY);
+let blobStorePromise;
+async function getBlobStore() {
+  if (!blobStorePromise) blobStorePromise = import('@netlify/blobs').then(({ getStore }) => getStore({ name: 'recortes-images', consistency: 'strong' }));
+  return blobStorePromise;
+}
 const ID_RE = /^[a-zA-Z0-9-]{6,64}$/;
 
 /** Detecta el formato real por los primeros bytes (evita guardar HTML disfrazado de imagen). */
@@ -40,7 +46,7 @@ function sniff(buf) {
 }
 
 /**
- * Descarga una imagen con los mismos controles que las páginas (anti-SSRF, tamaño, tiempo).
+ * Descarga una imagen con los mismos controles que las pÃ¡ginas (anti-SSRF, tamaÃ±o, tiempo).
  * Devuelve null si no se puede usar: la UI muestra un recorte de reemplazo.
  */
 export async function downloadImage(imageUrl) {
@@ -72,9 +78,13 @@ export async function downloadImage(imageUrl) {
 export async function savePreviewImage(imageUrl) {
   const image = await downloadImage(imageUrl);
   if (!image) return null;
-  await mkdir(PATHS.tmp, { recursive: true });
   const token = randomBytes(16).toString('hex');
-  await writeFile(path.join(PATHS.tmp, `prev-${token}.${image.ext}`), image.buffer);
+  if (ON_NETLIFY) {
+    await (await getBlobStore()).set(`preview/${token}`, new Blob([image.buffer]), { metadata: { ext: image.ext, source: image.source } });
+  } else {
+    await mkdir(PATHS.tmp, { recursive: true });
+    await writeFile(path.join(PATHS.tmp, `prev-${token}.${image.ext}`), image.buffer);
+  }
   return { token, ext: image.ext, source: image.source };
 }
 
@@ -86,21 +96,54 @@ export async function findPreviewFile(token) {
       const info = await stat(file);
       if (info.isFile()) return { file, ext };
     } catch {
-      /* siguiente extensión */
+      /* siguiente extensiÃ³n */
     }
   }
   return null;
 }
 
+export async function readPreviewImage(token) {
+  if (!TOKEN_RE.test(token || '')) return null;
+  if (ON_NETLIFY) {
+    const blobs = await getBlobStore();
+    const metadata = await blobs.getMetadata(`preview/${token}`);
+    const data = await blobs.get(`preview/${token}`, { type: 'arrayBuffer' });
+    return data ? { buffer: Buffer.from(data), ext: metadata?.metadata?.ext || 'jpg' } : null;
+  }
+  const found = await findPreviewFile(token);
+  return found ? { buffer: await readFile(found.file), ext: found.ext } : null;
+}
+
+export async function readThumb(linkId) {
+  if (!ID_RE.test(linkId || '')) return null;
+  if (ON_NETLIFY) {
+    const blobs = await getBlobStore();
+    for (const ext of Object.keys(MIME_BY_EXT)) {
+      const data = await blobs.get(`thumbs/${linkId}.${ext}`, { type: 'arrayBuffer' });
+      if (data) return { buffer: Buffer.from(data), ext };
+    }
+    return null;
+  }
+  const found = await thumbFile(linkId);
+  return found ? { buffer: await readFile(found.file), ext: found.ext } : null;
+}
 /** Mueve la imagen temporaria al archivo definitivo del recorte. */
 export async function promotePreviewImage(token, linkId) {
   if (!ID_RE.test(linkId || '')) return null;
+  if (ON_NETLIFY) {
+    const preview = await readPreviewImage(token);
+    if (!preview) return null;
+    const blobs = await getBlobStore();
+    const file = `${linkId}.${preview.ext}`;
+    await blobs.set(`thumbs/${file}`, new Blob([preview.buffer]));
+    await blobs.delete(`preview/${token}`);
+    return { file, ext: preview.ext };
+  }
   const found = await findPreviewFile(token);
   if (!found) return null;
   await mkdir(PATHS.thumbs, { recursive: true });
   const target = path.join(PATHS.thumbs, `${linkId}.${found.ext}`);
   await rename(found.file, target).catch(async () => {
-    // Si el rename falla (archivo bloqueado en Windows) copiamos el contenido.
     const { readFile } = await import('node:fs/promises');
     await writeFile(target, await readFile(found.file));
     await unlink(found.file).catch(() => {});
@@ -113,6 +156,13 @@ export async function saveImageForLink(imageUrl, linkId) {
   if (!ID_RE.test(linkId || '')) return null;
   const image = await downloadImage(imageUrl);
   if (!image) return null;
+  if (ON_NETLIFY) {
+    const blobs = await getBlobStore();
+    const file = `${linkId}.${image.ext}`;
+    await blobs.set(`thumbs/${file}`, new Blob([image.buffer]));
+    for (const ext of Object.keys(MIME_BY_EXT)) if (ext !== image.ext) await blobs.delete(`thumbs/${linkId}.${ext}`);
+    return { file, ext: image.ext, source: image.source };
+  }
   await mkdir(PATHS.thumbs, { recursive: true });
   await writeFile(path.join(PATHS.thumbs, `${linkId}.${image.ext}`), image.buffer);
   for (const ext of Object.keys(MIME_BY_EXT)) {
@@ -129,7 +179,7 @@ export async function thumbFile(linkId) {
       const info = await stat(file);
       if (info.isFile()) return { file, ext, size: info.size, mtimeMs: info.mtimeMs };
     } catch {
-      /* siguiente extensión */
+      /* siguiente extensiÃ³n */
     }
   }
   return null;
@@ -139,8 +189,9 @@ export function mimeForExt(ext) {
   return MIME_BY_EXT[ext] || 'application/octet-stream';
 }
 
-/** Limpia tokens viejos de vista previa que el usuario nunca guardó. */
+/** Limpia tokens viejos de vista previa que el usuario nunca guardÃ³. */
 export async function cleanupPreviewFiles() {
+  if (ON_NETLIFY) return;
   const cutoff = Date.now() - 2 * 60 * 60 * 1000;
   let names = [];
   try {
@@ -159,3 +210,6 @@ export async function cleanupPreviewFiles() {
     }
   }
 }
+
+
+

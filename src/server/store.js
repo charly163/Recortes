@@ -5,14 +5,20 @@ import { CONFIG, PATHS } from './config.js';
 import { HttpError } from './http.js';
 
 const STORE_VERSION = 1;
+const ON_NETLIFY = Boolean(process.env.NETLIFY);
+let blobStorePromise;
+async function getBlobStore() {
+  if (!blobStorePromise) blobStorePromise = import('@netlify/blobs').then(({ getStore }) => getStore({ name: 'recortes-data', consistency: 'strong' }));
+  return blobStorePromise;
+}
 
-/** Carpetas con las que arranca un archivo vacío. Se pueden renombrar o borrar. */
+/** Carpetas con las que arranca un archivo vacÃ­o. Se pueden renombrar o borrar. */
 const SEED_CATEGORIES = [
-  { name: 'Para después', icon: 'clock' },
+  { name: 'Para despuÃ©s', icon: 'clock' },
   { name: 'Cursos y clases', icon: 'book' },
   { name: 'Bases de datos', icon: 'database' },
   { name: 'Herramientas', icon: 'wrench' },
-  { name: 'Inspiración', icon: 'spark' },
+  { name: 'InspiraciÃ³n', icon: 'spark' },
 ];
 
 const ICONS = new Set([
@@ -36,7 +42,7 @@ function httpUrl(value) {
   try {
     url = new URL(String(value || '').trim());
   } catch {
-    throw new HttpError(400, 'Ese link no es válido. Tiene que empezar con http:// o https://.');
+    throw new HttpError(400, 'Ese link no es vÃ¡lido. Tiene que empezar con http:// o https://.');
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
     throw new HttpError(400, 'Solo se pueden guardar links http o https.');
@@ -76,13 +82,15 @@ export class Store {
   }
 
   async init() {
-    await mkdir(CONFIG.dataDir, { recursive: true });
-    await mkdir(PATHS.thumbs, { recursive: true });
-    await mkdir(PATHS.tmp, { recursive: true });
+    if (!ON_NETLIFY) {
+      await mkdir(CONFIG.dataDir, { recursive: true });
+      await mkdir(PATHS.thumbs, { recursive: true });
+      await mkdir(PATHS.tmp, { recursive: true });
+    }
 
     let raw = null;
     try {
-      raw = await readFile(PATHS.store, 'utf8');
+      raw = ON_NETLIFY ? await (await getBlobStore()).get('store.json', { type: 'text', consistency: 'strong' }) : await readFile(PATHS.store, 'utf8');
     } catch (err) {
       if (err.code !== 'ENOENT') throw err;
     }
@@ -101,11 +109,11 @@ export class Store {
       }
     }
 
-    await this.cleanupTmp();
+    if (!ON_NETLIFY) await this.cleanupTmp();
     return this;
   }
 
-  /** Deja el archivo en un estado seguro aunque venga de una importación o edición manual. */
+  /** Deja el archivo en un estado seguro aunque venga de una importaciÃ³n o ediciÃ³n manual. */
   normalize(input) {
     const data = {
       version: STORE_VERSION,
@@ -129,7 +137,7 @@ export class Store {
       });
     }
 
-    // Sólo dos niveles: si un padre no existe o ya es hijo, la carpeta queda arriba.
+    // SÃ³lo dos niveles: si un padre no existe o ya es hijo, la carpeta queda arriba.
     const byId = new Map(data.categories.map((c) => [c.id, c]));
     for (const c of data.categories) {
       if (!c.parentId) continue;
@@ -178,9 +186,13 @@ export class Store {
   async persist() {
     const snapshot = JSON.stringify(this.data, null, 2);
     this.writeChain = this.writeChain.then(async () => {
-      const tmp = `${PATHS.store}.${process.pid}.tmp`;
-      await writeFile(tmp, snapshot, 'utf8');
-      await rename(tmp, PATHS.store);
+      if (ON_NETLIFY) {
+        await (await getBlobStore()).set('store.json', snapshot);
+      } else {
+        const tmp = `${PATHS.store}.${process.pid}.tmp`;
+        await writeFile(tmp, snapshot, 'utf8');
+        await rename(tmp, PATHS.store);
+      }
     });
     return this.writeChain;
   }
@@ -310,13 +322,18 @@ export class Store {
   }
 
   async removeThumbFiles(id) {
+    if (ON_NETLIFY) {
+      const blobs = await getBlobStore();
+      for (const ext of ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif']) await blobs.delete(`thumbs/${id}.${ext}`);
+      return;
+    }
     const base = path.join(PATHS.thumbs, path.basename(id));
     for (const ext of ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif']) {
       await unlink(base + ext).catch(() => {});
     }
   }
 
-  // ---------------------------------------------------------------- categorías
+  // ---------------------------------------------------------------- categorÃ­as
 
   siblingNameTaken(name, parentId, exceptId) {
     const lower = name.toLocaleLowerCase('es');
@@ -328,11 +345,11 @@ export class Store {
 
   async createCategory(input) {
     const name = cleanText(input?.name, MAX_NAME);
-    if (!name) throw new HttpError(400, 'Poné un nombre para la carpeta.');
+    if (!name) throw new HttpError(400, 'PonÃ© un nombre para la carpeta.');
     const parentId = input?.parentId || null;
     if (parentId) {
       const parent = this.getCategory(parentId);
-      if (parent.parentId) throw new HttpError(400, 'Sólo se permiten dos niveles: carpeta y subcarpeta.');
+      if (parent.parentId) throw new HttpError(400, 'SÃ³lo se permiten dos niveles: carpeta y subcarpeta.');
     }
     if (this.siblingNameTaken(name, parentId)) throw new HttpError(409, 'Ya hay una carpeta con ese nombre en este nivel.');
 
@@ -352,7 +369,7 @@ export class Store {
     const category = this.getCategory(id);
     if ('name' in input) {
       const name = cleanText(input.name, MAX_NAME);
-      if (!name) throw new HttpError(400, 'Poné un nombre para la carpeta.');
+      if (!name) throw new HttpError(400, 'PonÃ© un nombre para la carpeta.');
       if (this.siblingNameTaken(name, category.parentId, id)) {
         throw new HttpError(409, 'Ya hay una carpeta con ese nombre en este nivel.');
       }
@@ -386,7 +403,7 @@ export class Store {
       this.data.links = keep;
       this.data.categories = this.data.categories.filter((c) => !categoryIds.has(c.id));
     } else {
-      // Las subcarpetas suben un nivel y conservan sus recortes; sólo se reubican los
+      // Las subcarpetas suben un nivel y conservan sus recortes; sÃ³lo se reubican los
       // recortes que estaban directamente en la carpeta borrada.
       for (const child of children) child.parentId = parentId;
       for (const link of this.data.links) {
@@ -430,7 +447,7 @@ export class Store {
         updatedAt: l.updatedAt,
         thumb: l.thumb ? { source: l.thumb.source, ext: l.thumb.ext } : null,
       })),
-      notice: 'Las imágenes de las miniaturas no se incluyen en este respaldo.',
+      notice: 'Las imÃ¡genes de las miniaturas no se incluyen en este respaldo.',
     };
   }
 
@@ -462,3 +479,6 @@ export class Store {
 }
 
 export const store = new Store();
+
+
+

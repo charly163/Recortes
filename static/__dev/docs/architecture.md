@@ -1,4 +1,4 @@
-﻿# Guía técnica de continuación
+# Guía técnica de continuación
 
 ## Estructura
 
@@ -40,3 +40,7 @@ La extracción puede fallar porque una red social bloquee solicitudes; el backen
 ## Criterios para la siguiente iteración
 
 Probar ancho de 360px y escritorio, teclado/foco y estados vacíos; confirmar API contra servidor local; verificar URL con preview bloqueada; incluir manifest/PWA e integrar share target; exponer las funciones de backup y administración de carpetas que ya ofrece la API.
+
+## Netlify
+
+`netlify.toml` publishes `static/`, deploys `netlify/functions/`, and rewrites `/api/*` to the `api` Function. The Function adapts the existing API handler. On Netlify, JSON state is stored in the site-wide `recortes-data` Blobs store and preview/final images in `recortes-images`, so data persists across deploys. Local `npm start` continues to use `data/` on disk. The runtime dependency is `@netlify/blobs`.

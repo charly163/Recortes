@@ -2,11 +2,14 @@
   "name": "recortes",
   "version": "1.0.0",
   "private": true,
-  "description": "Archivo de recortes: guardá links con su captura, ordenados por categorías.",
+  "description": "Archivo de recortes: guardÃ¡ links con su captura, ordenados por categorÃ­as.",
   "type": "module",
   "main": "server.js",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^10.5.0"
   },
   "scripts": {
     "start": "node server.js",
@@ -15,3 +18,5 @@
     "icons": "python tools/make-icons.py"
   }
 }
+
+
