@@ -1,0 +1,42 @@
+﻿<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f1e9db" />
+  <meta name="description" content="Tu archivo personal de recortes de internet." />
+  <title>Recortes — archivo personal</title>
+  <link rel="stylesheet" href="/app/fonts.css" />
+  <link rel="stylesheet" href="/app/tokens.css" />
+  <link rel="stylesheet" href="/app/base.css" />
+  <link rel="stylesheet" href="/app/components.css" />
+  <link rel="stylesheet" href="/app/app.css" />
+  <script type="module" src="/app/app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Ir al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Recortes, inicio"><span class="brand__name">Recortes<span class="brand__dot">.</span></span><span class="brand__tag">archivo personal</span></a>
+    <div class="topbar__actions">
+      <button class="btn btn--outline btn--icon" id="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema"></button>
+      <button class="btn btn--accent topbar__new" data-action="add" type="button">＋ Guardar link</button>
+    </div>
+  </header>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar" aria-label="Navegación y carpetas"></aside>
+    <main class="view" id="main">
+      <section class="intro"><span class="eyebrow">Tu colección, a mano</span><h1 class="page-title">Un lugar para volver.</h1><p class="lead">Guardá eso que encontraste y querés mirar con tiempo.</p></section>
+      <section class="toolbar" aria-label="Buscar y filtrar">
+        <label class="searchbox"><span class="sr-only">Buscar por título, dominio o nota</span><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar recortes…" autocomplete="off" /></label>
+        <label class="filter-select"><span class="sr-only">Filtrar por plataforma</span><select id="platform-filter"><option value="">Todas las plataformas</option></select></label>
+      </section>
+      <div class="active-filters" id="active-filters"></div>
+      <section class="collection-head"><h2 class="section-title" id="collection-title">Todos los recortes</h2><span class="counter" id="result-count">0</span></section>
+      <section class="cards" id="cards" aria-live="polite"></section>
+    </main>
+  </div>
+  <nav class="bottomnav" aria-label="Navegación principal"><button class="bottomnav__item is-active" data-nav="all" type="button"><span>▦</span>Recortes</button><button class="bottomnav__item" data-action="categories" type="button"><span>▤</span>Carpetas</button><button class="bottomnav__item" data-action="add" type="button"><span>＋</span>Guardar</button></nav>
+  <button class="fab" data-action="add" type="button" aria-label="Guardar un link"><span aria-hidden="true">＋</span></button>
+  <div class="overlay-root" id="overlay-root"></div><div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

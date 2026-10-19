@@ -1,0 +1,121 @@
+/* ============================================================================
+   Recortes — tokens de diseño
+   Papel cálido, tinta oscura y un único acento bermellón. Nada de azul SaaS.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Superficies: escalones de papel, no sombras */
+  --paper: #f1e9db;
+  --paper-raise: #fcf7ed;
+  --paper-sink: #e9e0ce;
+  --paper-deep: #ded2bd;
+
+  /* Tinta */
+  --ink: #211e18;
+  --ink-2: #514a3b;
+  --ink-3: #7d7361;
+
+  /* Líneas finas de 1px */
+  --line: #d9ccb6;
+  --line-strong: #c5b69c;
+
+  /* Acento único: bermellón de sello */
+  --accent: #b53a22;
+  --accent-strong: #982d18;
+  --accent-ink: #fdf4e9;
+  --accent-wash: #f4dcd1;
+  --accent-line: #e2b9a7;
+  --selection: #f2cfc1;
+
+  --overlay: rgba(40, 32, 22, 0.44);
+
+  /* Sombras sólo para lo que flota (hojas, FAB) */
+  --shadow-sheet: 0 32px 80px -32px rgba(66, 44, 22, 0.5), 0 8px 24px -16px rgba(66, 44, 22, 0.28);
+  --shadow-fab: 0 12px 26px -10px rgba(120, 45, 22, 0.48), 0 2px 5px rgba(60, 35, 15, 0.16);
+  --shadow-card: 0 16px 30px -22px rgba(70, 45, 20, 0.55);
+  --shadow-pop: 0 10px 24px -14px rgba(66, 44, 22, 0.4);
+
+  /* Textura de papel (grano fino, se repite) */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+
+  /* Tipografía */
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  /* Radios */
+  --r-xs: 3px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+
+  /* Espaciado */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* Medidas */
+  --topbar-h: 56px;
+  --bottomnav-h: 60px;
+  --sidebar-w: 248px;
+  --content-max: 1180px;
+
+  /* Movimiento */
+  --ease: cubic-bezier(0.22, 0.7, 0.24, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 300ms;
+
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Tinta carbón cálida, nunca negro puro */
+  --paper: #1b1815;
+  --paper-raise: #23201b;
+  --paper-sink: #141210;
+  --paper-deep: #2c2822;
+
+  --ink: #eee5d5;
+  --ink-2: #c3b8a5;
+  --ink-3: #9c917e;
+
+  --line: #332e27;
+  --line-strong: #4b4337;
+
+  --accent: #e26a4b;
+  --accent-strong: #ef8163;
+  --accent-ink: #1c110c;
+  --accent-wash: #3a231b;
+  --accent-line: #6d3f2f;
+  --selection: #4a2b21;
+
+  --overlay: rgba(7, 5, 4, 0.66);
+
+  --shadow-sheet: 0 32px 90px -28px rgba(0, 0, 0, 0.72), 0 8px 24px -16px rgba(0, 0, 0, 0.5);
+  --shadow-fab: 0 12px 26px -10px rgba(0, 0, 0, 0.62), 0 2px 5px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 16px 30px -22px rgba(0, 0, 0, 0.7);
+  --shadow-pop: 0 10px 24px -14px rgba(0, 0, 0, 0.6);
+
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 1ms;
+    --dur-2: 1ms;
+    --dur-3: 1ms;
+  }
+}
