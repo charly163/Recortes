@@ -25,7 +25,7 @@ const TOKEN_RE = /^[a-f0-9]{16,40}$/;
 const ON_NETLIFY = Boolean(process.env.NETLIFY);
 let blobStorePromise;
 async function getBlobStore() {
-  if (!blobStorePromise) blobStorePromise = import('@netlify/blobs').then(({ getStore }) => getStore({ name: 'recortes-images', consistency: 'strong' }));
+  if (!blobStorePromise) blobStorePromise = import('@netlify/blobs').then(({ getStore }) => getStore('recortes-images'));
   return blobStorePromise;
 }
 const ID_RE = /^[a-zA-Z0-9-]{6,64}$/;
@@ -46,7 +46,7 @@ function sniff(buf) {
 }
 
 /**
- * Descarga una imagen con los mismos controles que las pÃ¡ginas (anti-SSRF, tamaÃ±o, tiempo).
+ * Descarga una imagen con los mismos controles que las pÃƒÂ¡ginas (anti-SSRF, tamaÃƒÂ±o, tiempo).
  * Devuelve null si no se puede usar: la UI muestra un recorte de reemplazo.
  */
 export async function downloadImage(imageUrl) {
@@ -96,7 +96,7 @@ export async function findPreviewFile(token) {
       const info = await stat(file);
       if (info.isFile()) return { file, ext };
     } catch {
-      /* siguiente extensiÃ³n */
+      /* siguiente extensiÃƒÂ³n */
     }
   }
   return null;
@@ -179,7 +179,7 @@ export async function thumbFile(linkId) {
       const info = await stat(file);
       if (info.isFile()) return { file, ext, size: info.size, mtimeMs: info.mtimeMs };
     } catch {
-      /* siguiente extensiÃ³n */
+      /* siguiente extensiÃƒÂ³n */
     }
   }
   return null;
@@ -189,7 +189,7 @@ export function mimeForExt(ext) {
   return MIME_BY_EXT[ext] || 'application/octet-stream';
 }
 
-/** Limpia tokens viejos de vista previa que el usuario nunca guardÃ³. */
+/** Limpia tokens viejos de vista previa que el usuario nunca guardÃƒÂ³. */
 export async function cleanupPreviewFiles() {
   if (ON_NETLIFY) return;
   const cutoff = Date.now() - 2 * 60 * 60 * 1000;
