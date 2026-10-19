@@ -43,6 +43,6 @@ export const handler = async (event) => {
   } catch (error) {
     if (error instanceof HttpError) return { statusCode: error.status, headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: JSON.stringify({ error: error.message, details: error.details || null }) };
     console.error('[recortes/netlify]', error);
-    return { statusCode: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: JSON.stringify({ error: 'Error interno de Recortes.', detail: error.message }) };
+    return { statusCode: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: JSON.stringify({ error: 'Error interno de Recortes.' }) };
   }
 };
