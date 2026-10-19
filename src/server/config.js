@@ -2,7 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = path.resolve(fileURLToPath(new URL('../../', import.meta.url)));
+const ROOT = process.env.NETLIFY ? process.cwd() : path.resolve(fileURLToPath(new URL('../../', import.meta.url)));
 
 export const CONFIG = {
   root: ROOT,
@@ -12,7 +12,7 @@ export const CONFIG = {
     : path.join(ROOT, 'data'),
   host: process.env.HOST || '0.0.0.0',
   port: Number(process.env.PORT || 4317),
-  // Autenticación básica opcional (recomendada si la app se expone fuera de la LAN).
+  // AutenticaciÃ³n bÃ¡sica opcional (recomendada si la app se expone fuera de la LAN).
   authUser: process.env.RECORTES_USER || '',
   authPass: process.env.RECORTES_PASS || '',
   // Permite guardar links hacia la red local (ej. un servicio propio). Apagado por defecto.
