@@ -13,6 +13,8 @@ function responseAdapter() {
 
 export const handler = async (event) => {
   process.env.NETLIFY = 'true';
+  const { connectLambda } = await import('@netlify/blobs');
+  connectLambda(event);
   const [{ handleApi }, { store }, { HttpError }] = await Promise.all([
     import('../../src/server/api.js'),
     import('../../src/server/store.js'),
