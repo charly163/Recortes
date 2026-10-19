@@ -1,6 +1,3 @@
-import { handleApi } from '../../src/server/api.js';
-import { store } from '../../src/server/store.js';
-import { HttpError } from '../../src/server/http.js';
 
 function responseAdapter() {
   return {
@@ -15,6 +12,12 @@ function responseAdapter() {
 }
 
 export const handler = async (event) => {
+  process.env.NETLIFY = 'true';
+  const [{ handleApi }, { store }, { HttpError }] = await Promise.all([
+    import('../../src/server/api.js'),
+    import('../../src/server/store.js'),
+    import('../../src/server/http.js'),
+  ]);
   try {
     await store.init();
     const path = (event.path || '/').replace(/^\/\.netlify\/functions\/api/, '/api');
