@@ -74,3 +74,10 @@
 .delete-options { flex-wrap:wrap; }
 .delete-options .btn { flex:1 1 auto; min-width:100px; }
 @media (max-width:719px) { .delete-options .btn { font-size:12px; padding-inline:8px; } }
+
+.icon-picker { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:6px; }
+.icon-picker__item { display:grid; place-items:center; min-width:40px; min-height:42px; border:1px solid var(--line); border-radius:var(--r-sm); color:var(--ink-2); }
+.icon-picker__item:hover { background:var(--paper-sink); color:var(--ink); }
+.icon-picker__item.is-selected { border-color:var(--accent); background:var(--accent-wash); color:var(--accent-strong); }
+.icon-picker__item .ic { width:18px; height:18px; }
+@media (max-width:380px) { .icon-picker { grid-template-columns:repeat(6,minmax(0,1fr)); } }
