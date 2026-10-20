@@ -192,3 +192,58 @@ body { font-size:17px; }
   .filter-select::after { right:11px; }
 }
 
+
+
+/* El filtro se presenta como una acci?n de toolbar, no como un campo de formulario. */
+.filter-select {
+  min-width:148px;
+}
+.filter-select::before {
+  content:'';
+  width:15px;
+  height:14px;
+  left:13px;
+  background:var(--ink-2);
+  clip-path:polygon(0 8%,100% 8%,62% 48%,62% 100%,38% 100%,38% 48%);
+  transform:translateY(-55%);
+}
+.filter-select .select {
+  min-height:50px;
+  padding-left:40px;
+  padding-right:38px;
+  border:1px solid var(--line-strong);
+  border-bottom-width:2px;
+  background:var(--paper-sink);
+  color:var(--ink);
+  font-weight:600;
+  box-shadow:0 2px 5px rgba(66,44,22,.08);
+}
+.filter-select .select:hover {
+  border-color:var(--accent);
+  background:var(--accent-wash);
+}
+.filter-select::after {
+  right:14px;
+  width:9px;
+  height:9px;
+  border-width:0 2px 2px 0;
+  border-color:var(--ink-2);
+  transform:translateY(-68%) rotate(45deg);
+}
+.filter-select:focus-within .select {
+  border-color:var(--accent);
+  box-shadow:var(--focus-ring);
+}
+.filter-select .select.is-filtered {
+  border-color:var(--accent);
+  background:var(--accent-wash);
+  color:var(--accent-strong);
+}
+.filter-select:has(.select.is-filtered)::before {
+  background:var(--accent);
+}
+@media (max-width:380px) {
+  .filter-select { min-width:136px; }
+  .filter-select .select { padding-left:36px; padding-right:32px; }
+}
+

@@ -42,6 +42,7 @@ function renderPlatformOptions() {
   const opts = PLATFORM_ORDER.filter(p => found.has(p)).map(p => `<option value="${esc(p)}">${esc(platformLabel(p))}</option>`).join('');
   $('#platform-filter').innerHTML = `<option value="">Todas las plataformas</option>${opts}`;
   $('#platform-filter').value = state.platform;
+  $('#platform-filter').classList.toggle('is-filtered', Boolean(state.platform));
 }
 function visibleLinks() {
   const q = state.query.trim().toLocaleLowerCase('es');
