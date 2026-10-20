@@ -81,3 +81,36 @@
 .icon-picker__item.is-selected { border-color:var(--accent); background:var(--accent-wash); color:var(--accent-strong); }
 .icon-picker__item .ic { width:18px; height:18px; }
 @media (max-width:380px) { .icon-picker { grid-template-columns:repeat(6,minmax(0,1fr)); } }
+
+/* Legibilidad: escala tipográfica ampliada en toda la interfaz. */
+body { font-size:16px; }
+.page-title { font-size:clamp(28px,5.8vw,36px); }
+.section-title { font-size:20px; }
+.eyebrow,.brand__tag,.field__label,.sheet__eyebrow { font-size:11px; }
+.counter { font-size:12px; }
+.bottomnav__item { font-size:12px; }
+.btn { font-size:15px; }
+.btn--sm,.btn--quiet { font-size:14px; }
+.field__hint,.field__error { font-size:13px; }
+.input,.textarea,.select,.searchbox input { font-size:16px; }
+.input--mono { font-size:14px; }
+.input--title { font-size:19px; }
+.sheet__title { font-size:24px; }
+.tree-item { font-size:15px; }
+.tree-item--child { font-size:14px; }
+.tree-item small { font-size:12px; }
+.recorte__title { font-size:18px; }
+.recorte__note { font-size:13px; }
+.platform-line { font-size:12px; }
+.recorte__category { font-size:11px; }
+.recorte__domain { font-size:11px; }
+.preview-result strong { font-size:16px; }
+.preview-result span { font-size:13px; }
+.filter-select .select { font-size:14px; }
+.manage-category__name { font-size:15px; }
+.manage-category__count { font-size:12px; }
+@media (max-width:380px) {
+  .recorte__title { font-size:17px; }
+  .delete-options .btn { font-size:13px; }
+}
+
