@@ -114,3 +114,81 @@ body { font-size:16px; }
   .delete-options .btn { font-size:13px; }
 }
 
+
+/* Segundo ajuste de lectura y filtro de plataforma. */
+body { font-size:17px; }
+.btn { font-size:16px; }
+.btn--sm,.btn--quiet { font-size:15px; }
+.input,.textarea,.select,.searchbox input { font-size:17px; }
+.input--mono { font-size:15px; }
+.input--title { font-size:20px; }
+.field__hint,.field__error { font-size:14px; }
+.eyebrow,.brand__tag,.field__label,.sheet__eyebrow { font-size:12px; }
+.counter,.tree-item small,.manage-category__count { font-size:13px; }
+.bottomnav__item { font-size:13px; }
+.tree-item { font-size:16px; }
+.tree-item--child { font-size:15px; }
+.recorte__title { font-size:19px; }
+.recorte__note,.manage-category__name { font-size:14px; }
+.platform-line,.recorte__domain { font-size:12px; }
+.recorte__category { font-size:12px; }
+.preview-result span { font-size:14px; }
+.filter-select {
+  position:relative;
+  flex:0 1 210px;
+  width:min(44%,210px);
+  min-width:136px;
+  color:var(--ink-2);
+}
+.filter-select::before {
+  content:'◎';
+  position:absolute;
+  z-index:1;
+  left:12px;
+  top:50%;
+  transform:translateY(-52%);
+  color:var(--ink-3);
+  font-size:18px;
+  line-height:1;
+  pointer-events:none;
+}
+.filter-select::after {
+  content:'';
+  position:absolute;
+  right:14px;
+  top:50%;
+  width:8px;
+  height:8px;
+  border-right:1.5px solid var(--ink-3);
+  border-bottom:1.5px solid var(--ink-3);
+  transform:translateY(-70%) rotate(45deg);
+  pointer-events:none;
+}
+.filter-select .select {
+  display:block;
+  width:100%;
+  height:50px;
+  min-height:50px;
+  padding:0 32px 0 38px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  appearance:none;
+  border:1px solid var(--line-strong);
+  border-radius:var(--r-md);
+  background-color:var(--paper-raise);
+  color:var(--ink);
+  font-size:15px;
+  font-weight:550;
+  cursor:pointer;
+}
+.filter-select .select:hover { border-color:var(--accent-line); background-color:var(--paper-sink); }
+.filter-select .select:focus-visible { border-color:var(--accent); box-shadow:var(--focus-ring); }
+@media (max-width:380px) {
+  .recorte__title { font-size:18px; }
+  .filter-select { flex-basis:136px; width:43%; min-width:132px; }
+  .filter-select .select { padding-left:34px; padding-right:27px; font-size:14px; }
+  .filter-select::before { left:10px; font-size:16px; }
+  .filter-select::after { right:11px; }
+}
+
